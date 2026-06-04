@@ -1,0 +1,204 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Wedding Color Palette - Old Money Romantic */
+  --burgundy: #5A1E2D;
+  --olive: #6B7050;
+  --ivory: #F5F1E8;
+  --dark-brown: #2B1B18;
+  --cream: #FAF8F3;
+  --wine-light: #7D3A4B;
+  --olive-light: #8B9070;
+  
+  /* Theme tokens */
+  --background: #F5F1E8;
+  --foreground: #2B1B18;
+  --card: #FAF8F3;
+  --card-foreground: #2B1B18;
+  --popover: #FAF8F3;
+  --popover-foreground: #2B1B18;
+  --primary: #5A1E2D;
+  --primary-foreground: #F5F1E8;
+  --secondary: #6B7050;
+  --secondary-foreground: #F5F1E8;
+  --muted: #E8E4DB;
+  --muted-foreground: #5A4A47;
+  --accent: #6B7050;
+  --accent-foreground: #F5F1E8;
+  --destructive: #8B3A3A;
+  --destructive-foreground: #F5F1E8;
+  --border: #D4CFC4;
+  --input: #E8E4DB;
+  --ring: #5A1E2D;
+  --radius: 0.5rem;
+}
+
+@theme inline {
+  --font-sans: 'Cormorant Garamond', 'Georgia', serif;
+  --font-serif: 'Playfair Display', 'Georgia', serif;
+  --font-mono: 'Geist Mono', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  
+  /* Custom colors */
+  --color-burgundy: var(--burgundy);
+  --color-olive: var(--olive);
+  --color-ivory: var(--ivory);
+  --color-dark-brown: var(--dark-brown);
+  --color-cream: var(--cream);
+  --color-wine-light: var(--wine-light);
+  --color-olive-light: var(--olive-light);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Paper texture overlay */
+.paper-texture {
+  background-image: 
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-blend-mode: soft-light;
+  opacity: 0.03;
+}
+
+/* Lace border pattern */
+.lace-border {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%235A1E2D' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Glassmorphism */
+.glass {
+  background: rgba(250, 248, 243, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(90, 30, 45, 0.1);
+}
+
+.glass-dark {
+  background: rgba(43, 27, 24, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(245, 241, 232, 0.1);
+}
+
+/* Floating particles animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(20px);
+    opacity: 0;
+  }
+}
+
+.particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(245, 241, 232, 0.8) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: float linear infinite;
+}
+
+/* Elegant scroll indicator */
+@keyframes scroll-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(10px);
+  }
+}
+
+.scroll-indicator {
+  animation: scroll-bounce 2s ease-in-out infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--ivory);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--burgundy);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--wine-light);
+}
+
+/* Elegant text shadow */
+.text-shadow-elegant {
+  text-shadow: 0 2px 10px rgba(43, 27, 24, 0.3);
+}
+
+/* Ornament divider */
+.ornament-divider {
+  position: relative;
+}
+
+.ornament-divider::before,
+.ornament-divider::after {
+  content: '❧';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--burgundy);
+  opacity: 0.5;
+}
+
+.ornament-divider::before {
+  left: 0;
+}
+
+.ornament-divider::after {
+  right: 0;
+  transform: translateY(-50%) scaleX(-1);
+}
