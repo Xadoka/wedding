@@ -2,17 +2,36 @@
 
 import { motion } from 'framer-motion'
 import { useInView } from 'framer-motion'
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { MapPin, Navigation } from 'lucide-react'
+import Script from 'next/script'
+
+declare global {
+  interface Window {
+    DG: any;
+  }
+}
 
 export default function LocationSection() {
-  const ref = useRef(null)
+  const ref = useRef<HTMLDivElement>(null)
+  const mapRef = useRef<HTMLDivElement>(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
-  // Прямая ссылка на 2gis
+  const LAT = 49.876315
+  const LON = 82.632927
   const MAP_URL = "https://2gis.kz/ustkam/geo/70030076171953716/82.632927,49.876315"
-  // Стабильная ссылка на виджет
-  const WIDGET_URL = "https://widgets.2gis.com/widget?type=firmsonmap&options=%7B%22pos%22%3A%7B%22lat%22%3A49.876315%2C%22lon%22%3A82.632927%2C%22zoom%22%3A16%7D%2C%22opt%22%3A%7B%22city%22%3A%22ustkam%22%7D%2C%22org%22%3A%2270030076171953716%22%7D"
+
+  useEffect(() => {
+    if (isInView && typeof window !== 'undefined' && window.DG) {
+      window.DG.then(() => {
+        const map = window.DG.map(mapRef.current, {
+          center: [LAT, LON],
+          zoom: 16,
+        });
+        window.DG.marker([LAT, LON]).addTo(map).bindPopup('Villa Tau');
+      });
+    }
+  }, [isInView]);
 
   const openMap = () => {
     window.open(MAP_URL, '_blank')
@@ -20,6 +39,10 @@ export default function LocationSection() {
 
   return (
     <section className="relative py-20 md:py-32 overflow-hidden bg-[#2B1B18]">
+      <Script 
+        src="https://maps.api.2gis.ru/2.0/loader.js?pkg=full" 
+        strategy="afterInteractive"
+      />
       {/* Background texture */}
       <div className="absolute inset-0 opacity-5">
         <div 
@@ -76,15 +99,10 @@ export default function LocationSection() {
             </p>
 
             {/* Map preview */}
-            <div className="relative rounded-xl overflow-hidden mb-8 aspect-video md:aspect-[21/9]">
-              <iframe
-                src={WIDGET_URL}
-                width="100%"
-                height="100%"
-                className="absolute inset-0 grayscale-[30%] contrast-[90%] sepia-[20%]"
-                style={{ border: 0 }}
-                loading="lazy"
-                title="Villa Tau на карте 2GIS"
+            <div className="relative rounded-xl overflow-hidden mb-8 aspect-video md:aspect-[21/9] z-0">
+              <div 
+                ref={mapRef}
+                className="w-full h-full grayscale-[30%] contrast-[90%] sepia-[20%]"
               />
               <div className="absolute inset-0 pointer-events-none border border-[#5A1E2D]/10 rounded-xl" />
             </div>
