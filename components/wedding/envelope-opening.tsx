@@ -1,30 +1,55 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface EnvelopeOpeningProps {
   onComplete: () => void
 }
 
+interface Particle {
+  id: number
+  x: number
+  y: number
+  targetY: number
+  duration: number
+  delay: number
+}
+
 export default function EnvelopeOpening({ onComplete }: EnvelopeOpeningProps) {
   const [stage, setStage] = useState<'closed' | 'opening' | 'letter-rising' | 'letter-fullscreen' | 'done'>('closed')
+  const [particles, setParticles] = useState<Particle[]>([])
+  const timersRef = useRef<NodeJS.Timeout[]>([])
 
   useEffect(() => {
-    const timer1 = setTimeout(() => setStage('opening'), 1200)
-    const timer2 = setTimeout(() => setStage('letter-rising'), 2200)
-    const timer3 = setTimeout(() => setStage('letter-fullscreen'), 3200)
-    const timer4 = setTimeout(() => setStage('done'), 4500)
-    const timer5 = setTimeout(() => onComplete(), 5000)
+    // Генерируем частицы только на клиенте, чтобы избежать Hydration Mismatch
+    const generatedParticles = [...Array(20)].map((_, i) => ({
+      id: i,
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      targetY: Math.random() * -200 - 100,
+      duration: 3 + Math.random() * 2,
+      delay: Math.random() * 3,
+    }))
+    setParticles(generatedParticles)
+  }, [])
 
+  // Очистка таймеров при размонтировании компонента
+  useEffect(() => {
     return () => {
-      clearTimeout(timer1)
-      clearTimeout(timer2)
-      clearTimeout(timer3)
-      clearTimeout(timer4)
-      clearTimeout(timer5)
+      timersRef.current.forEach(clearTimeout)
     }
-  }, [onComplete])
+  }, [])
+
+  const startOpening = () => {
+    if (stage !== 'closed') return
+    setStage('opening')
+    
+    timersRef.current.push(setTimeout(() => setStage('letter-rising'), 1500))
+    timersRef.current.push(setTimeout(() => setStage('letter-fullscreen'), 3000))
+    timersRef.current.push(setTimeout(() => setStage('done'), 5000))
+    timersRef.current.push(setTimeout(() => onComplete(), 5700))
+  }
 
   return (
     <AnimatePresence>
@@ -32,7 +57,7 @@ export default function EnvelopeOpening({ onComplete }: EnvelopeOpeningProps) {
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1.2 }}
           className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden"
           style={{ backgroundColor: '#F5F1E8' }}
         >
@@ -45,25 +70,25 @@ export default function EnvelopeOpening({ onComplete }: EnvelopeOpeningProps) {
 
           {/* Gold sparkle particles */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            {[...Array(20)].map((_, i) => (
+            {particles.map((p) => (
               <motion.div
-                key={i}
+                key={p.id}
                 className="absolute w-1 h-1 rounded-full bg-[#C9A85C]"
                 initial={{ 
-                  x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
-                  y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
+                  x: p.x,
+                  y: p.y,
                   opacity: 0,
                   scale: 0 
                 }}
                 animate={{ 
-                  y: [null, Math.random() * -200 - 100],
+                  y: [null, p.targetY],
                   opacity: [0, 0.8, 0],
                   scale: [0, 1, 0]
                 }}
                 transition={{ 
-                  duration: 3 + Math.random() * 2,
+                  duration: p.duration,
                   repeat: Infinity,
-                  delay: Math.random() * 3,
+                  delay: p.delay,
                   ease: 'easeOut'
                 }}
               />
@@ -72,12 +97,13 @@ export default function EnvelopeOpening({ onComplete }: EnvelopeOpeningProps) {
 
           {/* Main envelope container */}
           <motion.div 
-            className="relative"
+            className="relative cursor-pointer"
+            onClick={startOpening}
             animate={stage === 'letter-fullscreen' ? { 
               scale: 0,
               opacity: 0
             } : {}}
-            transition={{ duration: 0.8, ease: 'easeInOut' }}
+            transition={{ duration: 1.2, ease: 'easeInOut' }}
           >
             {/* Envelope wrapper with 3D perspective */}
             <div 
@@ -115,7 +141,7 @@ export default function EnvelopeOpening({ onComplete }: EnvelopeOpeningProps) {
                     ? { y: -80, scale: 1 }
                     : { y: 0, scale: 1 }
                 }
-                transition={{ duration: 0.8, ease: 'easeOut' }}
+                transition={{ duration: 1.2, ease: 'easeOut' }}
                 className="absolute inset-6 rounded-md flex flex-col items-center justify-center overflow-hidden"
                 style={{ 
                   backgroundColor: '#FAF8F3',
@@ -195,7 +221,7 @@ export default function EnvelopeOpening({ onComplete }: EnvelopeOpeningProps) {
                     ? { rotateX: -180 }
                     : { rotateX: 0 }
                 }
-                transition={{ duration: 0.9, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ duration: 1.4, ease: [0.4, 0, 0.2, 1] }}
                 style={{ 
                   transformOrigin: 'top center',
                   transformStyle: 'preserve-3d',
@@ -289,7 +315,7 @@ export default function EnvelopeOpening({ onComplete }: EnvelopeOpeningProps) {
                     ? { scale: 0, opacity: 0, rotate: 180 }
                     : { scale: 1, opacity: 1, rotate: 0 }
                 }
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 0.6 }}
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30"
               >
                 <div 
@@ -325,7 +351,7 @@ export default function EnvelopeOpening({ onComplete }: EnvelopeOpeningProps) {
                 initial={{ opacity: 0, scale: 0.3 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
                 className="absolute inset-0 flex items-center justify-center"
                 style={{ backgroundColor: '#FAF8F3' }}
               >
@@ -375,7 +401,7 @@ export default function EnvelopeOpening({ onComplete }: EnvelopeOpeningProps) {
             transition={{ delay: 0.5 }}
             className="absolute bottom-10 left-1/2 -translate-x-1/2"
           >
-            <motion.p 
+            <motion.p
               animate={{ opacity: [0.4, 0.8, 0.4] }}
               transition={{ duration: 2, repeat: Infinity }}
               className="text-[#5A1E2D]/50 text-[10px] tracking-[0.3em] uppercase font-sans"

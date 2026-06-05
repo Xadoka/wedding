@@ -49,13 +49,13 @@ interface YTPlayer {
 }
 
 // Sara Perche Ti Amo - Ricchi Poveri
-const YOUTUBE_VIDEO_ID = 'FWXLKwRFVHg'
+const YOUTUBE_VIDEO_ID = 'm3xfP4M50wo' // Вставьте сюда ID вашего видео
 
 export default function MusicPlayer() {
   const playerRef = useRef<YTPlayer | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [isReady, setIsReady] = useState(false)
-  const [hasInteracted, setHasInteracted] = useState(false)
+  const [isReady, setIsReady] = useState(false) // Player is ready
+  const [userInteracted, setUserInteracted] = useState(false) // User has clicked/touched the document
 
   // Load saved state from localStorage
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function MusicPlayer() {
     localStorage.setItem('wedding-music-playing', String(isPlaying))
   }, [isPlaying])
 
-  const initPlayer = useCallback(() => {
+  const initPlayer = useCallback(() => { // Function to initialize the YouTube player
     if (playerRef.current || !window.YT) return
 
     playerRef.current = new window.YT.Player('youtube-player', {
@@ -81,7 +81,7 @@ export default function MusicPlayer() {
         autoplay: 0,
         loop: 1,
         playlist: YOUTUBE_VIDEO_ID,
-        controls: 0,
+        controls: 0, // We will handle autoplay manually after interaction
         showinfo: 0,
         modestbranding: 1,
         rel: 0,
@@ -92,75 +92,83 @@ export default function MusicPlayer() {
         onReady: (event) => {
           event.target.setVolume(18)
           setIsReady(true)
-          
-          // Auto-play if was playing before
-          const savedState = localStorage.getItem('wedding-music-playing')
-          if (savedState === 'true' && hasInteracted) {
-            event.target.playVideo()
-          }
+          // Playback logic will be handled by a separate useEffect
         },
         onStateChange: (event) => {
           if (event.data === window.YT.PlayerState.PLAYING) {
             setIsPlaying(true)
-          } else if (event.data === window.YT.PlayerState.PAUSED) {
+          } else if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.ENDED) {
             setIsPlaying(false)
           }
         },
       },
     })
-  }, [hasInteracted])
+  }, []) // No dependency on hasInteracted here, as playback is handled by a separate effect
 
   // Load YouTube IFrame API
   useEffect(() => {
     if (typeof window === 'undefined') return
 
-    const tag = document.createElement('script')
-    tag.src = 'https://www.youtube.com/iframe_api'
-    const firstScriptTag = document.getElementsByTagName('script')[0]
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag)
+    // Only load API if not already loaded
+    if (!window.YT) {
+      const tag = document.createElement('script')
+      tag.src = 'https://www.youtube.com/iframe_api'
+      const firstScriptTag = document.getElementsByTagName('script')[0]
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag)
 
-    window.onYouTubeIframeAPIReady = () => {
-      initPlayer()
+      window.onYouTubeIframeAPIReady = () => {
+        initPlayer()
+      }
     }
 
     // Check if API already loaded
     if (window.YT && window.YT.Player) {
       initPlayer()
     }
-
+    
     return () => {
       if (playerRef.current) {
         playerRef.current.destroy()
+        playerRef.current = null // Clear ref on unmount
       }
     }
   }, [initPlayer])
 
   // Handle first user interaction
   useEffect(() => {
-    const handleFirstInteraction = () => {
-      setHasInteracted(true)
-      
-      // Try to auto-play after interaction if state was saved as playing
-      const savedState = localStorage.getItem('wedding-music-playing')
-      if (savedState === 'true' && playerRef.current && isReady) {
-        playerRef.current.playVideo()
-      }
-      
-      document.removeEventListener('click', handleFirstInteraction)
-      document.removeEventListener('touchstart', handleFirstInteraction)
+    const handleInteraction = () => {
+      setUserInteracted(true)
+      // Remove listeners after first interaction
+      document.removeEventListener('click', handleInteraction)
+      document.removeEventListener('touchstart', handleInteraction)
     }
 
-    document.addEventListener('click', handleFirstInteraction)
-    document.addEventListener('touchstart', handleFirstInteraction)
+    // Attach listeners only if not yet interacted
+    if (!userInteracted) {
+      document.addEventListener('click', handleInteraction)
+      document.addEventListener('touchstart', handleInteraction)
+    }
 
     return () => {
-      document.removeEventListener('click', handleFirstInteraction)
-      document.removeEventListener('touchstart', handleFirstInteraction)
+      document.removeEventListener('click', handleInteraction)
+      document.removeEventListener('touchstart', handleInteraction)
     }
-  }, [isReady])
+  }, [userInteracted])
+
+  // Effect to control playback based on state
+  useEffect(() => {
+    if (isReady && userInteracted && isPlaying && playerRef.current) {
+      playerRef.current.playVideo()
+    } else if (isReady && playerRef.current && !isPlaying) {
+      playerRef.current.pauseVideo()
+    }
+  }, [isReady, userInteracted, isPlaying]) // Depend on all relevant states
 
   const toggleMusic = () => {
     if (!playerRef.current || !isReady) return
+
+    // If user interacts with the button, it counts as interaction
+    setUserInteracted(true)
 
     if (isPlaying) {
       playerRef.current.pauseVideo()

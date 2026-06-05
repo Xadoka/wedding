@@ -6,9 +6,9 @@ import { useRef } from 'react'
 import { Clock } from 'lucide-react'
 
 const schedule = [
-  { time: '15:00', event: 'Сбор гостей', description: 'Добро пожаловать' },
-  { time: '16:00', event: 'Начало торжества', description: 'Церемония' },
-  { time: '17:00', event: 'Банкет', description: 'Праздничный ужин' },
+  { time: '15:00', event: 'Сбор гостей', description: '' },
+  { time: '16:00', event: 'Начало торжества', description: '' },
+  { time: '22:00', event: 'Окончание торжества', description: '' },
 ]
 
 export default function ScheduleSection() {

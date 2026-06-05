@@ -9,8 +9,13 @@ export default function LocationSection() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true, margin: '-100px' })
 
+  // Прямая ссылка на 2gis
+  const MAP_URL = "https://2gis.kz/ustkam/geo/70030076171953716/82.632927,49.876315"
+  // Стабильная ссылка на виджет
+  const WIDGET_URL = "https://widgets.2gis.com/widget?type=firmsonmap&options=%7B%22pos%22%3A%7B%22lat%22%3A49.876315%2C%22lon%22%3A82.632927%2C%22zoom%22%3A16%7D%2C%22opt%22%3A%7B%22city%22%3A%22ustkam%22%7D%2C%22org%22%3A%2270030076171953716%22%7D"
+
   const openMap = () => {
-    window.open('https://2gis.kz/ustkam/geo/70000001088457485/82.633371,49.876807', '_blank')
+    window.open(MAP_URL, '_blank')
   }
 
   return (
@@ -20,7 +25,7 @@ export default function LocationSection() {
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1478146896981-b80fe463b330?q=80&w=2070&auto=format&fit=crop')`,
+            backgroundImage: `url('https://images.unsplash.com/photo-1519167758481-83f550bb49b3?q=80&w=2048&auto=format&fit=crop')`,
           }}
         />
       </div>
@@ -73,7 +78,7 @@ export default function LocationSection() {
             {/* Map preview */}
             <div className="relative rounded-xl overflow-hidden mb-8 aspect-video md:aspect-[21/9]">
               <iframe
-                src="https://widgets.2gis.com/widget?type=firmsonmap&options=%7B%22pos%22%3A%7B%22lat%22%3A49.876807%2C%22lon%22%3A82.633371%2C%22zoom%22%3A16%7D%2C%22opt%22%3A%7B%22city%22%3A%22ustkam%22%7D%2C%22org%22%3A%2270000001088457485%22%7D"
+                src={WIDGET_URL}
                 width="100%"
                 height="100%"
                 className="absolute inset-0 grayscale-[30%] contrast-[90%] sepia-[20%]"
