@@ -41,7 +41,7 @@ export default function EnvelopeOpening({ onComplete }: EnvelopeOpeningProps) {
       setStage('done')
       // Вызываем onComplete чуть позже, чтобы анимация выхода (opacity) успела отработать
       setTimeout(() => onComplete(), 1000)
-    }, 6000)
+    }, 3000)
 
     return () => {
       clearTimeout(mainTimer)

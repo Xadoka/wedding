@@ -44,6 +44,8 @@ interface YTPlayer {
   playVideo: () => void
   pauseVideo: () => void
   setVolume: (volume: number) => void
+  unMute: () => void
+  mute: () => void
   getPlayerState: () => number
   destroy: () => void
 }
@@ -79,6 +81,7 @@ export default function MusicPlayer() {
       videoId: YOUTUBE_VIDEO_ID,
       playerVars: {
         autoplay: 1,
+        mute: 1, // Начинаем без звука, чтобы браузер разрешил автостарт
         loop: 1,
         playlist: YOUTUBE_VIDEO_ID,
         controls: 0, // We will handle autoplay manually after interaction
@@ -86,13 +89,19 @@ export default function MusicPlayer() {
         modestbranding: 1,
         rel: 0,
         enablejsapi: 1,
+        playsinline: 1,
         origin: typeof window !== 'undefined' ? window.location.origin : '',
       },
       events: {
         onReady: (event) => {
-          event.target.setVolume(18)
-          // Пытаемся запустить сразу при готовности (на случай, если браузер разрешит)
-          if (isPlaying) event.target.playVideo()
+          // Если пользователь уже взаимодействовал, включаем звук сразу
+          if (userInteracted && isPlaying) {
+            event.target.unMute()
+            event.target.setVolume(18)
+          }
+          
+          // Всегда запускаем видео (даже если оно будет играть без звука в фоне)
+          event.target.playVideo()
           setIsReady(true)
           // Playback logic will be handled by a separate useEffect
         },
@@ -144,8 +153,10 @@ export default function MusicPlayer() {
     const handleInteraction = () => {
       setUserInteracted(true)
       
-      // Пытаемся запустить видео прямо в момент события
+      // Включаем звук и играем прямо в момент клика/тапа
       if (playerRef.current && isReady && isPlaying) {
+        playerRef.current.unMute()
+        playerRef.current.setVolume(18)
         playerRef.current.playVideo()
       }
 
@@ -198,7 +209,11 @@ export default function MusicPlayer() {
   return (
     <>
       {/* Hidden YouTube player */}
-      <div id="youtube-player" className="hidden" />
+      <div 
+        id="youtube-player" 
+        className="fixed pointer-events-none opacity-0" 
+        style={{ width: '1px', height: '1px', left: '-10px', top: '-10px' }} 
+      />
 
       {/* Music toggle button */}
       <motion.button
