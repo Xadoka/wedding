@@ -44,8 +44,6 @@ interface YTPlayer {
   playVideo: () => void
   pauseVideo: () => void
   setVolume: (volume: number) => void
-  unMute: () => void
-  mute: () => void
   getPlayerState: () => number
   destroy: () => void
 }
@@ -58,6 +56,7 @@ export default function MusicPlayer() {
   const [isPlaying, setIsPlaying] = useState(true)
   const [isReady, setIsReady] = useState(false) // Player is ready
   const [userInteracted, setUserInteracted] = useState(false) // User has clicked/touched the document
+  const pendingPlayRef = useRef(false)
 
   // Load saved state from localStorage
   useEffect(() => {
@@ -76,12 +75,12 @@ export default function MusicPlayer() {
     if (playerRef.current || !window.YT) return
 
     playerRef.current = new window.YT.Player('youtube-player', {
-      height: '0',
-      width: '0',
+      height: '360',
+      width: '640',
       videoId: YOUTUBE_VIDEO_ID,
       playerVars: {
         autoplay: 1,
-        mute: 1, // Начинаем без звука, чтобы браузер разрешил автостарт
+        mute: 1,
         loop: 1,
         playlist: YOUTUBE_VIDEO_ID,
         controls: 0, // We will handle autoplay manually after interaction
@@ -95,7 +94,7 @@ export default function MusicPlayer() {
       events: {
         onReady: (event) => {
           // Если пользователь уже взаимодействовал, включаем звук сразу
-          if (userInteracted && isPlaying) {
+          if ((userInteracted || pendingPlayRef.current) && isPlaying) {
             event.target.unMute()
             event.target.setVolume(18)
           }
@@ -152,9 +151,10 @@ export default function MusicPlayer() {
     const events = ['click', 'touchstart', 'mousedown', 'keydown', 'scroll', 'wheel']
     const handleInteraction = () => {
       setUserInteracted(true)
+      pendingPlayRef.current = true
       
-      // Включаем звук и играем прямо в момент клика/тапа
-      if (playerRef.current && isReady && isPlaying) {
+      // Важно: на iOS/Safari управление звуком должно быть синхронным в обработчике
+      if (playerRef.current && typeof playerRef.current.unMute === 'function') {
         playerRef.current.unMute()
         playerRef.current.setVolume(18)
         playerRef.current.playVideo()

@@ -36,7 +36,7 @@ export default function EnvelopeOpening({ onComplete }: EnvelopeOpeningProps) {
 
   useEffect(() => {
     // Устанавливаем задержку перед тем, как экран приветствия исчезнет
-    // 6000мс (6 секунд) — это время, пока имена будут на экране
+    // 3000мс (6 секунд) — это время, пока имена будут на экране
     const mainTimer = setTimeout(() => {
       setStage('done')
       // Вызываем onComplete чуть позже, чтобы анимация выхода (opacity) успела отработать
