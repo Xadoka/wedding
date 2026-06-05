@@ -33,10 +33,6 @@ export default function LocationSection() {
     }
   }, [isInView]);
 
-  const openMap = () => {
-    window.open(MAP_URL, '_blank')
-  }
-
   return (
     <section className="relative py-20 md:py-32 overflow-hidden bg-[#2B1B18]">
       <Script 
@@ -87,7 +83,7 @@ export default function LocationSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="glass rounded-2xl p-8 md:p-12 mb-8"
+            className="glass rounded-2xl p-8 md:p-12 mb-8 relative z-10"
           >
             <h3 className="text-3xl md:text-5xl text-[#5A1E2D] mb-4"
                 style={{ fontFamily: 'var(--font-playfair)' }}>
@@ -99,7 +95,7 @@ export default function LocationSection() {
             </p>
 
             {/* Map preview */}
-            <div className="relative rounded-xl overflow-hidden mb-8 aspect-video md:aspect-[21/9] z-0">
+            <div className="relative rounded-xl overflow-hidden mb-8 aspect-video md:aspect-[21/9]">
               <div 
                 ref={mapRef}
                 className="w-full h-full grayscale-[30%] contrast-[90%] sepia-[20%]"
@@ -107,16 +103,18 @@ export default function LocationSection() {
               <div className="absolute inset-0 pointer-events-none border border-[#5A1E2D]/10 rounded-xl" />
             </div>
 
-            {/* Open map button */}
-            <motion.button
-              onClick={openMap}
+            {/* Open map link styled as a button */}
+            <motion.a
+              href={MAP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-3 px-8 py-4 bg-[#5A1E2D] text-[#F5F1E8] rounded-full font-sans text-sm tracking-wider uppercase hover:bg-[#7D3A4B] transition-colors duration-300 shadow-lg"
+              className="relative z-20 inline-flex items-center gap-3 px-8 py-4 bg-[#5A1E2D] text-[#F5F1E8] rounded-full font-sans text-sm tracking-wider uppercase hover:bg-[#7D3A4B] transition-colors duration-300 shadow-lg cursor-pointer pointer-events-auto"
             >
               <Navigation className="w-4 h-4" />
               Открыть карту
-            </motion.button>
+            </motion.a>
           </motion.div>
         </motion.div>
       </div>
